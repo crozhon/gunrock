@@ -14,6 +14,9 @@
 
 #pragma once
 
+#include <stdio.h>
+
+
 namespace gunrock {
 namespace util {
 
@@ -51,44 +54,70 @@ namespace util {
 #define GR_LOG_MEM_BANKS(arch) \
   ((arch >= 200) ? GR_SM20_LOG_MEM_BANKS() : GR_SM10_LOG_MEM_BANKS())
 
-// Physical shared memory per SM (bytes)
-#define GR_SM75_SMEM_BYTES() (65536)   // 64KB on SM7.5
-#define GR_SM61_SMEM_BYTES() (98304)   // 96KB on SM6.1+
-#define GR_SM60_SMEM_BYTES() (65536)   // 64KB on SM6.0+
-#define GR_SM52_SMEM_BYTES() (98304)   // 64KB on SM5.2
-#define GR_SM50_SMEM_BYTES() (65536)   // 64KB on SM5.0+
-#define GR_SM37_SMEM_BYTES() (114688)  // 48KB + 64KB on SM3.7
-#define GR_SM20_SMEM_BYTES() (49152)   // 48KB on SM2.0+
-#define GR_SM10_SMEM_BYTES() (16384)   // 32KB on SM1.0-SM1.3
-#define GR_SMEM_BYTES(arch)                                                 \
-  ((arch == 750)                                                            \
-       ? GR_SM75_SMEM_BYTES()                                               \
-       : (arch >= 610)                                                      \
-             ? GR_SM61_SMEM_BYTES()                                         \
-             : (arch >= 600)                                                \
-                   ? GR_SM60_SMEM_BYTES()                                   \
-                   : (arch == 520)                                          \
-                         ? GR_SM52_SMEM_BYTES()                             \
-                         : (arch >= 500)                                    \
-                               ? GR_SM50_SMEM_BYTES()                       \
-                               : (arch == 370)                              \
-                                     ? GR_SM37_SMEM_BYTES()                 \
-                                     : (arch >= 200) ? GR_SM20_SMEM_BYTES() \
-                                                     : GR_SM10_SMEM_BYTES())
+const int GR_SM75_SMEM_BYTES = 65536;   // 64KB on SM7.5
+const int GR_SM61_SMEM_BYTES = 98304;   // 96KB on SM6.1+
+const int GR_SM60_SMEM_BYTES = 65536;   // 64KB on SM6.0+
+const int GR_SM52_SMEM_BYTES = 98304;   // 64KB on SM5.2
+const int GR_SM50_SMEM_BYTES = 65536;   // 64KB on SM5.0+
+const int GR_SM37_SMEM_BYTES = 114688;  // 48KB + 64KB on SM3.7
+const int GR_SM20_SMEM_BYTES = 49152;   // 48KB on SM2.0+
+const int GR_SM10_SMEM_BYTES = 16384;   // 32KB on SM1.0-SM1.3
+
+constexpr int GR_SMEM_BYTES(int arch)
+{
+  if (arch == 750)
+  {
+    return GR_SM75_SMEM_BYTES;
+  }
+  else if (arch >= 610)
+  {
+    return GR_SM61_SMEM_BYTES;
+  }
+  else if (arch >= 600)
+  {
+    return GR_SM60_SMEM_BYTES;
+  }
+  else if (arch == 520)
+  {
+    return GR_SM52_SMEM_BYTES;
+  }
+  else if (arch >= 500)
+  {
+    return GR_SM50_SMEM_BYTES;
+  }
+  else if (arch == 370)
+  {
+    return GR_SM37_SMEM_BYTES;
+  }
+  else if (arch >= 200)
+  {
+    return GR_SM20_SMEM_BYTES;
+  }
+  else 
+    return GR_SM10_SMEM_BYTES;
+}
 
 // Physical threads per SM
-#define GR_SM75_SM_THREADS() (1024)  // 1024 threads on SM7.5 (Turing)
-#define GR_SM30_SM_THREADS() (2048)  // 2048 threads on SM3.0+
-#define GR_SM20_SM_THREADS() (1536)  // 1536 threads on SM2.0+
-#define GR_SM12_SM_THREADS() (1024)  // 1024 threads on SM1.2-SM1.3
-#define GR_SM10_SM_THREADS() (768)   // 768 threads on SM1.0-SM1.1
-#define GR_SM_THREADS(arch)                                                    \
-  ((arch == 750)                                                               \
-       ? GR_SM75_SM_THREADS()                                                  \
-       : (arch >= 300) ? GR_SM30_SM_THREADS()                                  \
-                       : (arch >= 200) ? GR_SM20_SM_THREADS()                  \
-                                       : (arch >= 130) ? GR_SM12_SM_THREADS()  \
-                                                       : GR_SM10_SM_THREADS())
+const int GR_SM75_SM_THREADS = (1024);  // 1024 threads on SM7.5 (Turing)
+const int GR_SM30_SM_THREADS = (2048);  // 2048 threads on SM3.0+
+const int GR_SM20_SM_THREADS = (1536);  // 1536 threads on SM2.0+
+const int GR_SM12_SM_THREADS = (1024);  // 1024 threads on SM1.2-SM1.3
+const int GR_SM10_SM_THREADS = (768);   // 768 threads on SM1.0-SM1.1
+
+constexpr int GR_SM_THREADS(int arch)
+{
+  if (arch == 750) {
+    return GR_SM75_SM_THREADS;
+  } else if (arch >= 300) {
+    return GR_SM30_SM_THREADS;
+  } else if (arch >= 200) {
+    return GR_SM20_SM_THREADS;
+  } else if (arch >= 130) {
+    return GR_SM12_SM_THREADS; 
+  } else {
+    return GR_SM10_SM_THREADS;
+  }
+}
 
 // Physical threads per CTA
 #define GR_SM20_LOG_CTA_THREADS() (10)  // 1024 threads on SM2.0+
@@ -179,6 +208,11 @@ class CudaProperties {
     cudaFuncAttributes flush_kernel_attrs;
     cudaFuncGetAttributes(&flush_kernel_attrs, FlushKernel<void>);
     kernel_ptx_version = flush_kernel_attrs.ptxVersion * 10;
+
+    printf("%d\n", device_props.totalGlobalMem);
+    printf("%d\n", device_props.regsPerBlock);
+    printf("%d\n", device_props.warpSize);
+    printf("%d\n", device_props.maxThreadsPerBlock);
   }
 };
 
