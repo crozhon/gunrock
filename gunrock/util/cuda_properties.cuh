@@ -160,6 +160,9 @@ class CudaProperties {
   // Information about our kernel assembly
   int kernel_ptx_version;
 
+  int num_threads;
+
+
  public:
   CudaProperties() {}
   CudaProperties(int gpu) { Setup(gpu); }
@@ -167,6 +170,12 @@ class CudaProperties {
     int current_device;
     cudaGetDevice(&current_device);
     Setup(current_device);
+
+    std::cout << device_props.totalGlobalMem << std::endl;
+    std::cout << device_props.sharedMemPerBlock << std::endl;
+    std::cout << device_props.regsPerBlock << std::endl;
+    std::cout << device_props.warpSize << std::endl;
+    std::cout << device_props.totalConstMem << std::endl;
   }
 
   // Constructor
