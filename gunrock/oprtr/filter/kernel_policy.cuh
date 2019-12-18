@@ -78,7 +78,6 @@ template <typename _Problem,
           MODE _FILTER_MODE = CULL>
 struct KernelPolicy {
   static const MODE FILTER_MODE = _FILTER_MODE;
-  static const int CUDA_ARCH = _CUDA_ARCH;
 
   typedef gunrock::oprtr::cull_filter::KernelPolicy<
       _Problem, _CUDA_ARCH, _SATURATION_QUIT, _DEQUEUE_PROBLEM_SIZE,

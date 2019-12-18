@@ -14,9 +14,6 @@
 
 #pragma once
 
-namespace gunrock {
-namespace util {
-
 /*****************************************************************
  * Macros for guiding compilation paths
  *****************************************************************/
@@ -24,11 +21,14 @@ namespace util {
 /**
  * CUDA architecture of the current compilation path
  */
-#ifndef __CUDA_ARCH__
-//#define __GR_CUDA_ARCH__ 0                      // Host path
+#ifdef __CUDA_ARCH__ // Device-side compilation
+#define GR_CUDA_ARCH __CUDA_ARCH__
 #else
-#define __GR_CUDA_ARCH__ __CUDA_ARCH__  // Device path
+#define GR_CUDA_ARCH 300 // Host-side compilation
 #endif
+
+namespace gunrock {
+namespace util {
 
 /*****************************************************************
  * Device properties by SM architectural version
